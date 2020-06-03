@@ -133,6 +133,7 @@ internal class StorageRootFetcher(private val context: Context, private val isRe
         return roots
     }
 
+
     private fun getStorageRoot(authority: String, cursor: Cursor): StorageRoot? {
         val flags = cursor.getInt(COLUMN_FLAGS)
         val supportsCreate = flags and FLAG_SUPPORTS_CREATE != 0

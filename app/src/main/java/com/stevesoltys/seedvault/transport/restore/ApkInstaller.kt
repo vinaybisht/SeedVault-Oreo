@@ -53,7 +53,7 @@ internal class ApkInstaller(private val context: Context) {
 
     private fun install(cachedApk: File, installerPackageName: String?) {
         val sessionParams = SessionParams(MODE_FULL_INSTALL).apply {
-            setInstallerPackageName(installerPackageName)
+            setAppPackageName(installerPackageName)
         }
         // Don't set more sessionParams intentionally here.
         // We saw strange permission issues when doing setInstallReason() or setting installFlags.

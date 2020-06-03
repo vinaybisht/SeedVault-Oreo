@@ -3,7 +3,8 @@ package com.stevesoltys.seedvault.transport.backup
 import android.app.backup.IBackupManager
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
+import android.content.pm.PackageManager.GET_SIGNATURES
+import android.os.Build
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
@@ -41,7 +42,8 @@ internal class PackageService(
                 }
             }
 
-            val eligibleApps = backupManager.filterAppsEligibleForBackupForUser(myUserId, packages.toTypedArray())
+            val eligibleApps = packages.toTypedArray()
+
 
             // log eligible packages
             if (Log.isLoggable(TAG, INFO)) {
@@ -61,12 +63,14 @@ internal class PackageService(
     val notAllowedPackages: List<PackageInfo>
         @WorkerThread
         get() {
-            val installed = packageManager.getInstalledPackages(GET_SIGNING_CERTIFICATES)
+            val installed =
+                packageManager.getInstalledPackages(GET_SIGNATURES)
+
             val installedArray = installed.map { packageInfo ->
                 packageInfo.packageName
             }.toTypedArray()
 
-            val eligible = backupManager.filterAppsEligibleForBackupForUser(myUserId, installedArray)
+            val eligible = (installedArray)
 
             return installed.filter { packageInfo ->
                 packageInfo.packageName !in eligible

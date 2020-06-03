@@ -6,7 +6,8 @@ import android.app.backup.BackupTransport.TRANSPORT_PACKAGE_REJECTED
 import android.app.backup.BackupTransport.TRANSPORT_QUOTA_EXCEEDED
 import android.content.Context
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
+import android.content.pm.PackageManager.GET_SIGNATURES
+
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.stevesoltys.seedvault.BackupNotificationManager
@@ -110,7 +111,7 @@ internal class BackupCoordinator(
     fun getBackupQuota(packageName: String, isFullBackup: Boolean): Long {
         if (packageName != MAGIC_PACKAGE_MANAGER) {
             // try to back up APK here as later methods are sometimes not called called
-            backUpApk(context.packageManager.getPackageInfo(packageName, GET_SIGNING_CERTIFICATES))
+            backUpApk(context.packageManager.getPackageInfo(packageName, GET_SIGNATURES))
         }
 
         // report back quota
@@ -149,7 +150,9 @@ internal class BackupCoordinator(
                 return TRANSPORT_PACKAGE_REJECTED
             }
             // hook in here to back up APKs of apps that are otherwise not allowed for backup
-            backUpNotAllowedPackages()
+
+            //TODO This method is not supported in lower android version, so have to comment.
+//            backUpNotAllowedPackages()
         }
         return kv.performBackup(packageInfo, data, flags)
     }
@@ -269,6 +272,7 @@ internal class BackupCoordinator(
 
     private fun backUpNotAllowedPackages() {
         Log.d(TAG, "Checking if APKs of opt-out apps need backup...")
+
         packageService.notAllowedPackages.forEach { optOutPackageInfo ->
             try {
                 backUpApk(optOutPackageInfo, NOT_ALLOWED)
@@ -276,6 +280,8 @@ internal class BackupCoordinator(
                 Log.e(TAG, "Error backing up opt-out APK of ${optOutPackageInfo.packageName}", e)
             }
         }
+
+
     }
 
     private fun backUpApk(packageInfo: PackageInfo, packageState: PackageState = UNKNOWN_ERROR) {

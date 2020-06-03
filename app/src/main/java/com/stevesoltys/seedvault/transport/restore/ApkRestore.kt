@@ -2,18 +2,15 @@ package com.stevesoltys.seedvault.transport.restore
 
 import android.content.Context
 import android.content.pm.PackageManager.GET_SIGNATURES
-import android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.drawable.Drawable
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.stevesoltys.seedvault.encodeBase64
 import com.stevesoltys.seedvault.metadata.PackageMetadata
 import com.stevesoltys.seedvault.metadata.PackageMetadataMap
 import com.stevesoltys.seedvault.metadata.isSystemApp
-import com.stevesoltys.seedvault.transport.backup.getSignatures
-import com.stevesoltys.seedvault.transport.restore.ApkRestoreStatus.FAILED
-import com.stevesoltys.seedvault.transport.restore.ApkRestoreStatus.IN_PROGRESS
-import com.stevesoltys.seedvault.transport.restore.ApkRestoreStatus.QUEUED
+import com.stevesoltys.seedvault.transport.restore.ApkRestoreStatus.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.collect
@@ -22,7 +19,6 @@ import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
-
 
 private val TAG = ApkRestore::class.java.simpleName
 
@@ -95,7 +91,7 @@ internal class ApkRestore(
         }
 
         // parse APK (GET_SIGNATURES is needed even though deprecated)
-        @Suppress("DEPRECATION") val flags = GET_SIGNING_CERTIFICATES or GET_SIGNATURES
+        @Suppress("DEPRECATION") val flags = GET_SIGNATURES
         val packageInfo = pm.getPackageArchiveInfo(cachedApk.absolutePath, flags)
                 ?: throw IOException("getPackageArchiveInfo returned null")
 
@@ -105,13 +101,13 @@ internal class ApkRestore(
         }
 
         // check APK version code
-        if (metadata.version != packageInfo.longVersionCode) {
-            Log.w(TAG, "Package $packageName expects version code ${metadata.version}, but has ${packageInfo.longVersionCode}.")
+        if (metadata.version != packageInfo.versionCode.toLong()) {
+            Log.w(TAG, "Package $packageName expects version code ${metadata.version}, but has ${packageInfo.versionCode.toLong()}.")
             // TODO should we let this one pass, maybe once we can revert PackageMetadata during backup?
         }
 
         // check signatures
-        if (metadata.signatures != packageInfo.signingInfo.getSignatures()) {
+        if (metadata.signatures != packageInfo.signatures) {
             Log.w(TAG, "Package $packageName expects different signatures.")
             // TODO should we let this one pass, the sha256 hash already verifies the APK?
         }
@@ -133,7 +129,8 @@ internal class ApkRestore(
             try {
                 val installedPackageInfo = pm.getPackageInfo(packageName, 0)
                 // metadata.version is not null, because here hasApk() must be true
-                val isOlder = metadata.version!! <= installedPackageInfo.longVersionCode
+                val isOlder = metadata.version!! <= installedPackageInfo.versionCode.toLong()
+
                 if (isOlder || !installedPackageInfo.isSystemApp()) throw NameNotFoundException()
             } catch (e: NameNotFoundException) {
                 Log.w(TAG, "Not installing $packageName because older or not a system app here.")

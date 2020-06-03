@@ -46,7 +46,6 @@ class ConfigurableBackupTransportService : Service() {
         transport = null
         Log.d(TAG, "Service destroyed.")
     }
-
 }
 
 @WorkerThread

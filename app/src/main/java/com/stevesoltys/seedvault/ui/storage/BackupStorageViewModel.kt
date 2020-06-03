@@ -27,7 +27,7 @@ internal class BackupStorageViewModel(
 
         // initialize the new location, will also generate a new backup token
         val observer = InitializationObserver()
-        backupManager.initializeTransportsForUser(UserHandle.myUserId(), arrayOf(TRANSPORT_ID), observer)
+        backupManager.initializeTransports(arrayOf(TRANSPORT_ID), observer)
 
         // if storage is on USB and this is not SetupWizard, do a backup right away
         if (isUsb && !isSetupWizard) Thread {

@@ -1,9 +1,6 @@
 package com.stevesoltys.seedvault.transport.backup
 
-import android.app.backup.BackupTransport.FLAG_INCREMENTAL
-import android.app.backup.BackupTransport.FLAG_NON_INCREMENTAL
 import android.app.backup.BackupTransport.TRANSPORT_ERROR
-import android.app.backup.BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED
 import android.app.backup.BackupTransport.TRANSPORT_OK
 import android.content.pm.PackageInfo
 import android.os.ParcelFileDescriptor
@@ -36,8 +33,8 @@ internal class KVBackup(
     fun getQuota(): Long = plugin.getQuota()
 
     fun performBackup(packageInfo: PackageInfo, data: ParcelFileDescriptor, flags: Int): Int {
-        val isIncremental = flags and FLAG_INCREMENTAL != 0
-        val isNonIncremental = flags and FLAG_NON_INCREMENTAL != 0
+        val isIncremental = flags and 1 shl 1 != 0
+        val isNonIncremental = flags and 1 shl 2 != 0
         val packageName = packageInfo.packageName
 
         when {
@@ -65,7 +62,7 @@ internal class KVBackup(
         }
         if (isIncremental && !hasDataForPackage) {
             Log.w(TAG, "Requested incremental, but transport currently stores no data $packageName, requesting non-incremental retry.")
-            return backupError(TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED)
+            return backupError(-1006)
         }
 
         // TODO check if package is over-quota

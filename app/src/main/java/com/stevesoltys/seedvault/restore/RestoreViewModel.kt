@@ -102,7 +102,7 @@ internal class RestoreViewModel(
     @Throws(RemoteException::class)
     private fun getOrStartSession(): IRestoreSession {
         val session = this.session
-                ?: backupManager.beginRestoreSessionForUser(UserHandle.myUserId(), null, TRANSPORT_ID)
+                ?: backupManager.beginRestoreSession( null, TRANSPORT_ID)
                 ?: throw RemoteException("beginRestoreSessionForUser returned null")
         this.session = session
         return session

@@ -48,7 +48,6 @@ internal class StorageRootsFragment : Fragment(), StorageRootClickedListener {
         } else {
             getSharedViewModel<BackupStorageViewModel>()
         }
-
         if (viewModel.isRestoreOperation) {
             titleView.text = getString(R.string.storage_fragment_restore_title)
             backView.visibility = VISIBLE

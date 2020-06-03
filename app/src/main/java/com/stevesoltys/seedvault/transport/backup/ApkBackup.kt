@@ -4,8 +4,9 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.content.pm.SigningInfo
+import android.os.Build
 import android.util.Log
-import android.util.PackageUtils.computeSha256DigestBytes
+import android.util.PackageUtils.computeSha256Digest
 import com.stevesoltys.seedvault.MAGIC_PACKAGE_MANAGER
 import com.stevesoltys.seedvault.encodeBase64
 import com.stevesoltys.seedvault.metadata.MetadataManager
@@ -51,13 +52,28 @@ class ApkBackup(
         }
 
         // TODO remove when adding support for packages with multiple signers
-        if (packageInfo.signingInfo.hasMultipleSigners()) {
-            Log.e(TAG, "Package $packageName has multiple signers. Not backing it up.")
-            return null
-        }
+        /* if (packageInfo.signingInfo.hasMultipleSigners()) {
+             Log.e(TAG, "Package $packageName has multiple signers. Not backing it up.")
+             return null
+         }*/
 
         // get signatures
-        val signatures = packageInfo.signingInfo.getSignatures()
+
+        /*  val signatures = if (Build.VERSION.SDK_INT >= 28) {
+              packageInfo.signingInfo.getSignatures()
+          } else {
+              packageInfo.signatures.map {
+                  hashSignature(it).encodeBase64()
+              }
+          }*/
+
+
+        val signatures =
+                packageInfo.signatures.map {
+                    hashSignature(it).encodeBase64()
+
+                }
+
         if (signatures.isEmpty()) {
             Log.e(TAG, "Package $packageName has no signatures. Not backing it up.")
             return null
@@ -68,7 +84,16 @@ class ApkBackup(
                 ?: PackageMetadata()
 
         // get version codes
-        val version = packageInfo.longVersionCode
+        /*  val version = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+              packageInfo.longVersionCode
+          } else {
+              packageInfo.versionCode.toLong()
+          }*/
+
+        val version =
+                packageInfo.versionCode.toLong()
+
+
         val backedUpVersion = packageMetadata.version ?: 0L  // no version will cause backup
 
         // do not backup if we have the version already and signatures did not change
@@ -140,5 +165,5 @@ fun SigningInfo.getSignatures(): List<String> {
 }
 
 private fun hashSignature(signature: Signature): ByteArray {
-    return computeSha256DigestBytes(signature.toByteArray()) ?: throw AssertionError()
+    return computeSha256Digest(signature.toByteArray()).toByteArray() ?: throw AssertionError()
 }

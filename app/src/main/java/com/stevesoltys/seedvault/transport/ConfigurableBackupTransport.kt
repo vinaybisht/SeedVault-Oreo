@@ -1,6 +1,6 @@
 package com.stevesoltys.seedvault.transport
 
-import android.app.backup.BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
+
 import android.app.backup.BackupTransport
 import android.app.backup.RestoreDescription
 import android.app.backup.RestoreSet
@@ -37,9 +37,9 @@ class ConfigurableBackupTransport internal constructor(private val context: Cont
         return TRANSPORT_ID
     }
 
-    override fun getTransportFlags(): Int {
+    /*override fun getTransportFlags(): Int {
         return FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
-    }
+    }*/
 
     override fun dataManagementIntent(): Intent {
         return Intent(context, SettingsActivity::class.java)

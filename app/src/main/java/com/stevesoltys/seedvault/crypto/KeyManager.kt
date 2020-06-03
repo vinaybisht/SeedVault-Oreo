@@ -1,5 +1,6 @@
 package com.stevesoltys.seedvault.crypto
 
+import android.os.Build
 import android.security.keystore.KeyProperties.BLOCK_MODE_GCM
 import android.security.keystore.KeyProperties.ENCRYPTION_PADDING_NONE
 import android.security.keystore.KeyProperties.PURPOSE_DECRYPT
@@ -67,7 +68,9 @@ internal class KeyManagerImpl : KeyManager {
                 .setEncryptionPaddings(ENCRYPTION_PADDING_NONE)
                 .setRandomizedEncryptionRequired(true)
         // unlocking is required only for decryption, so when restoring from backup
-        builder.setUnlockedDeviceRequired(true)
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            builder.setUnlockedDeviceRequired(true)
+        }*/
         return builder.build()
     }
 

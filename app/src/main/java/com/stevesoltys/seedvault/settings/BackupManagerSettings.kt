@@ -4,7 +4,7 @@ import android.content.ContentResolver
 import android.provider.Settings
 import java.util.concurrent.TimeUnit.DAYS
 
-private val SETTING = Settings.Secure.BACKUP_MANAGER_CONSTANTS
+private val SETTING = "backup_manager_constants"
 private const val DELIMITER = ','
 
 private const val KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS = "key_value_backup_interval_milliseconds"
